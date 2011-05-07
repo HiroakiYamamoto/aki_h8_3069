@@ -17,7 +17,7 @@ MEMORY
 SECTIONS
 {
 	.vectors : {
-		vector.o(.data)
+		../../build/build_h8300-elf/vector.o(.data)
 	} > vectors
 
 	.text : {

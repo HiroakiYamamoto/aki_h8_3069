@@ -13,6 +13,8 @@ OBJDUMP	= $(BINDIR)/$(ADDNAME)objdump
 RANLIB	= $(BINDIR)/$(ADDNAME)ranlib
 STRIP	= $(BINDIR)/$(ADDNAME)strip
 
+BUILD_DIR = ../../build/build_$(ARCH)
+
 H8WRITE	= ../../tools/h8write/h8write
 
 H8WRITE_SERDEV	= /dev/ttyS1
@@ -21,6 +23,12 @@ OBJS	= vector.o startup.o main.o
 OBJS	+= lib.o serial.o xmodem.o elf.o
 
 TARGET	= kzload
+
+BUILD_OBJS	= $(patsubst %, $(BUILD_DIR)/%, $(OBJS))
+
+BUILD_TARGET	= $(patsubst %, $(BUILD_DIR)/%, $(TARGET))
+
+BUILD_MOT	= $(addsuffix .mot, $(BUILD_TARGET))
 
 CFLAGS	= -Wall -mh -nostdinc -nostdlib -fno-builtin
 #CFLAGS	+= -mint32
@@ -31,29 +39,29 @@ CFLAGS	+= -DKZLOAD
 
 LDFLAGS	= -static -T ld.scr -L.
 
-.SUFFIXES: .c .o
-.SUFFIXES: .s .o
+#.SUFFIXES: .c .o
+#.SUFFIXES: .s .o
 
-all :		$(TARGET)
+all :		$(BUILD_DIR) $(BUILD_TARGET)
 
-$(TARGET) :	$(OBJS)
-		$(CC) $(OBJS) -o $(TARGET) $(CFLAGS) $(LDFLAGS)
-		cp $(TARGET) $(TARGET).elf
-		$(STRIP) $(TARGET)
+$(BUILD_DIR)/$(TARGET) :	$(BUILD_OBJS)
+		$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
+		cp $@ $(BUILD_DIR)/$(TARGET).elf
+		$(STRIP) $@
 
-.c.o :		$<
-		$(CC) -c $(CFLAGS) $<
+$(BUILD_DIR)/%.o :	%.c
+		$(CC) -c $(CFLAGS) -o $@ $<
 
-.s.o :		$<
-		$(CC) -c $(CFLAGS) $<
+$(BUILD_DIR)/%.o :	%.s
+		$(CC) -c $(CFLAGS) -o $@ $<
 
-$(TARGET).mot :	$(TARGET)
-		$(OBJCOPY) -O srec $(TARGET) $(TARGET).mot
+$(BUILD_MOT) :	$(BUILD_TARGET)
+		$(OBJCOPY) -O srec $^ $@
 
-image :	$(TARGET).mot
+image :		$(BUILD_MOT)
 
-write :		$(TARGET).mot
-		$(H8WRITE) -3069 -f20 $(TARGET).mot $(H8WRITE_SERDEV)
+write :		$(BUILD_MOT)
+		$(H8WRITE) -3069 -f20 \^ $(H8WRITE_SERDEV)
 
 clean :		
-		rm -f $(OBJS) $(TARGET) $(TARGET).elf $(TARGET).mot
+		rm -f $(BUILD_OBJS) $(BUILD_TARGET) $(BUILD_TARGET).elf $(BUILD_MOT)
