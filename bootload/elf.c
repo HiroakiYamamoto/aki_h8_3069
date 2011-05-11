@@ -71,27 +71,22 @@ static int elf_load_program(struct elf_header *header)
 		if (phdr->type != 1) /* Is it possible to load the segmet */
 			continue;
 
-		putxval(phdr->offset, 6); puts(" ");
-		putxval(phdr->virtual_addr, 8); puts(" ");
-		putxval(phdr->physical_addr, 8); puts(" ");
-		putxval(phdr->file_size, 5); puts(" ");
-		putxval(phdr->memory_size, 5); puts(" ");
-		putxval(phdr->flags, 2); puts(" ");
-		putxval(phdr->align, 2); puts("\n");
+		memcpy((char *)phdr->physical_addr, (char *)header + phdr->offset, phdr->file_size);
+		memset((char *)phdr->physical_addr + phdr->file_size,  0, phdr->memory_size - phdr->file_size);
 	}
 
 	return 0;
 }
 
-int elf_load(char *buf)
+char *elf_load(char *buf)
 {
 	struct elf_header *header = (struct elf_header *) buf;
 	
 	if (elf_check(header) < 0) /* ELF header check */
-		return -1;
+		return NULL;
 
 	if (elf_load_program(header) < 0) /* Load ELF files in a unit of segment */
-		return -1;
+		return NULL;
 
-	return 0;
+	return (char *)header->entry_point;
 }
