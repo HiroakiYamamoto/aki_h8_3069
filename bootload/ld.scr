@@ -5,6 +5,7 @@ ENTRY("_start")
 MEMORY
 {
 	romall(rx)	: org = 0x000000, len = 0x080000 /* 518KB */
+	softvec(rw)	: org = 0xffbf20, len = 0x000040 /* top of RAM */
 	vectors(r)	: org = 0x000000, len = 0x000100 /* top of ROM */
 	rom(rx)		: org = 0x000100, len = 0x07ff00
 
@@ -33,6 +34,10 @@ SECTIONS
 		*(.rodata.*)
 		_erodata = . ;
 	} > rom
+
+	.sofvec : {
+		_softvec = .;
+	} > softvec
 
 	.buffer : {
 		_buffer_start = . ;

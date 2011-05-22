@@ -15,7 +15,7 @@ STRIP	= $(BINDIR)/$(ADDNAME)strip
 
 BUILD_DIR = ../../build/build_$(ARCH)/$(TARGET)
 
-OBJS	= startup.o main.o
+OBJS	= startup.o main.o interrupt.o
 OBJS	+= lib.o serial.o
 
 TARGET	= kozos
@@ -23,6 +23,8 @@ TARGET	= kozos
 BUILD_OBJS	= $(patsubst %, $(BUILD_DIR)/%, $(OBJS))
 
 BUILD_TARGET	= $(patsubst %, $(BUILD_DIR)/%, $(TARGET))
+
+BUILD_ELF	= $(addsuffix .elf, $(BUILD_TARGET))
 
 BUILD_MOT	= $(addsuffix .mot, $(BUILD_TARGET))
 
@@ -51,5 +53,8 @@ $(BUILD_DIR)/%.o :	%.c
 $(BUILD_DIR)/%.o :	%.s
 		$(CC) -c $(CFLAGS) -o $@ $<
 
+$(BUILD_DIR)/%.o :	%.S
+		$(CC) -c $(CFLAGS) -o $@ $<
+
 clean :		
-		rm -f $(BUILD_OBJS) $(BUILD_TARGET) $(BUILD_TARGET).elf
+		rm -f $(BUILD_OBJS) $(BUILD_TARGET) $(BUILD_ELF)

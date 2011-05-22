@@ -19,7 +19,7 @@ H8WRITE	= ../../tools/h8write/h8write
 
 H8WRITE_SERDEV	= /dev/ttyS1
 
-OBJS	= vector.o startup.o main.o
+OBJS	= vector.o startup.o intr.o main.o interrupt.o
 OBJS	+= lib.o serial.o xmodem.o elf.o
 
 TARGET	= kzload
@@ -27,6 +27,8 @@ TARGET	= kzload
 BUILD_OBJS	= $(patsubst %, $(BUILD_DIR)/%, $(OBJS))
 
 BUILD_TARGET	= $(patsubst %, $(BUILD_DIR)/%, $(TARGET))
+
+BUILD_ELF	= $(addsuffix .elf, $(BUILD_TARGET))
 
 BUILD_MOT	= $(addsuffix .mot, $(BUILD_TARGET))
 
@@ -55,13 +57,16 @@ $(BUILD_DIR)/%.o :	%.c
 $(BUILD_DIR)/%.o :	%.s
 		$(CC) -c $(CFLAGS) -o $@ $<
 
+$(BUILD_DIR)/%.o :	%.S
+		$(CC) -c $(CFLAGS) -o $@ $<
+
 $(BUILD_MOT) :	$(BUILD_TARGET)
 		$(OBJCOPY) -O srec $^ $@
 
 image :		$(BUILD_MOT)
 
 write :		$(BUILD_MOT)
-		$(H8WRITE) -3069 -f20 \^ $(H8WRITE_SERDEV)
+		$(H8WRITE) -3069 -f20 $^ $(H8WRITE_SERDEV)
 
 clean :		
-		rm -f $(BUILD_OBJS) $(BUILD_TARGET) $(BUILD_TARGET).elf $(BUILD_MOT)
+		rm -f $(BUILD_OBJS) $(BUILD_TARGET) $(BUILD_ELF) $(BUILD_MOT)
