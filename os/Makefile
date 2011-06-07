@@ -17,6 +17,7 @@ BUILD_DIR = ../../build/build_$(ARCH)/$(TARGET)
 
 OBJS	= startup.o main.o interrupt.o
 OBJS	+= lib.o serial.o
+OBJS	+= kozos.o syscall.o test08_1.o
 
 TARGET	= kozos
 
@@ -35,7 +36,7 @@ CFLAGS	+= -I.
 CFLAGS	+= -Os
 CFLAGS	+= -DKOZOS
 
-LDFLAGS	= -static -T ld.scr -L.
+LDFLAGS	= -static -lgcc -T ld.scr -L.
 
 #.SUFFIXES: .c .o
 #.SUFFIXES: .s .o

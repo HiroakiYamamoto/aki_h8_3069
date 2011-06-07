@@ -12,7 +12,8 @@ MEMORY
 	ramall(rwx)	: org = 0xffbf20, len = 0x004000 /* 16KB */
 	buffer(rwx)	: org = 0xffdf20, len = 0x001d00 /* 8KB */
 	data(rwx)	: org = 0xfffc20, len = 0x000300
-	stack(rw)	: org = 0xffff00, len = 0x000000 /* end of RAM */
+	bootstack(rw)	: org = 0xffff00, len = 0x000000
+	intrstack(rw)	: org = 0xffff00, len = 0x000000 /* end of RAM */
 }
 
 SECTIONS
@@ -59,7 +60,11 @@ SECTIONS
 	. = ALIGN(4);
 	_end = . ;
 
-	.stack : {
-		_stack = .;
-	} > stack
+	.bootstack : {
+		_bootstack = .;
+	} > bootstack
+
+	.intrstack : {
+		_intrstack = .;
+	} > intrstack
 }
